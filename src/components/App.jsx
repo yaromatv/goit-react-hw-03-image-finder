@@ -20,10 +20,14 @@ class App extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.query !== this.state.query) {
+      this.setState({ page: 1 });
       this.setState({ status: 'loading' });
 
       this.fetchData(this.state.query)
-        .then(data => this.setState({ data, status: 'ready', page: 2 }))
+        .then(data => {
+          this.setState({ data, status: 'ready' });
+          this.incrementPage();
+        })
         .catch(error => this.setState({ error, status: 'error' }));
     }
   }
@@ -58,20 +62,23 @@ class App extends Component {
     }
   };
 
-  handleButtonClick = () => {
+  incrementPage = () => {
     this.setState(prevState => ({
       page: prevState.page + 1,
     }));
+  };
 
+  handleButtonClick = () => {
     this.setState({ status: 'load-more' });
 
     this.fetchData(this.state.query)
-      .then(data =>
+      .then(data => {
         this.setState(prevState => ({
           data: [...prevState.data, ...data],
           status: 'ready',
-        }))
-      )
+        }));
+        this.incrementPage();
+      })
       .catch(error => this.setState({ error, status: 'error' }));
   };
 
